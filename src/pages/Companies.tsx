@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { mockCompanies } from '../data/mockData';
-import { Building2, MapPin, Globe, Users, Search, Briefcase, BookmarkPlus, Edit2, Plus } from 'lucide-react';
+import { Building2, MapPin, Globe, Users, Search, Briefcase, BookmarkPlus, Edit2, Plus, Eye, X, Calendar, Award } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import type { Company, EmployerUser } from '../types';
 
@@ -10,6 +10,7 @@ const Companies = () => {
   const [selectedIndustry, setSelectedIndustry] = useState<string>('');
   const [showCompanyForm, setShowCompanyForm] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
+  const [selectedCompanyDetails, setSelectedCompanyDetails] = useState<Company | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null);
   // Initialize savedCompanies state using localStorage
@@ -81,6 +82,14 @@ const Companies = () => {
       console.error('Failed to save company:', error);
       showNotification('error', 'Failed to save company');
     }
+  };
+
+  const handleViewCompanyDetails = (company: Company) => {
+    setSelectedCompanyDetails(company);
+  };
+
+  const closeCompanyDetails = () => {
+    setSelectedCompanyDetails(null);
   };
 
   const handleSubmitCompany = async (e: React.FormEvent) => {
@@ -338,6 +347,205 @@ const Companies = () => {
         </div>
       )}
 
+      {/* Company Details Modal */}
+      {selectedCompanyDetails && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-start mb-6">
+              <div className="flex items-center space-x-4">
+                {selectedCompanyDetails.logo ? (
+                  <img
+                    src={selectedCompanyDetails.logo}
+                    alt={selectedCompanyDetails.name}
+                    className="w-16 h-16 rounded-lg object-cover"
+                  />
+                ) : (
+                  <div className="w-16 h-16 bg-primary-100 rounded-lg flex items-center justify-center">
+                    <Building2 size={32} className="text-primary-600" />
+                  </div>
+                )}
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900">{selectedCompanyDetails.name}</h2>
+                  <p className="text-lg text-gray-600">{selectedCompanyDetails.industry.join(', ')}</p>
+                </div>
+              </div>
+              <button
+                onClick={closeCompanyDetails}
+                className="text-gray-400 hover:text-gray-600 p-2"
+                aria-label="Close details"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Company Overview */}
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">Company Overview</h3>
+                  <p className="text-gray-700 leading-relaxed">{selectedCompanyDetails.description}</p>
+                </div>
+
+                {/* Basic Information */}
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">Basic Information</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center">
+                      <MapPin size={20} className="text-gray-400 mr-3" />
+                      <span className="text-gray-700">{selectedCompanyDetails.location}</span>
+                    </div>
+                    
+                    {selectedCompanyDetails.size && (
+                      <div className="flex items-center">
+                        <Users size={20} className="text-gray-400 mr-3" />
+                        <span className="text-gray-700">{selectedCompanyDetails.size} employees</span>
+                      </div>
+                    )}
+                    
+                    {selectedCompanyDetails.founded && (
+                      <div className="flex items-center">
+                        <Calendar size={20} className="text-gray-400 mr-3" />
+                        <span className="text-gray-700">Founded in {selectedCompanyDetails.founded}</span>
+                      </div>
+                    )}
+                    
+                    {selectedCompanyDetails.website && (
+                      <div className="flex items-center">
+                        <Globe size={20} className="text-gray-400 mr-3" />
+                        <a
+                          href={selectedCompanyDetails.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary-600 hover:text-primary-700 underline"
+                        >
+                          Visit Website
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Industries */}
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">Industries</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedCompanyDetails.industry.map((industry, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-sm font-medium"
+                      >
+                        {industry}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Information */}
+              <div className="space-y-6">
+                {/* Open Positions */}
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">Open Positions</h3>
+                  <div className="flex items-center p-4 bg-green-50 rounded-lg">
+                    <Briefcase size={24} className="text-green-600 mr-3" />
+                    <div>
+                      <p className="text-lg font-semibold text-green-800">
+                        {selectedCompanyDetails.openPositions || 0} positions available
+                      </p>
+                      <p className="text-sm text-green-600">Discover available opportunities</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Company Stats (Mock Data) */}
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">Company Statistics</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-blue-50 p-4 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-blue-600">4.5</div>
+                      <div className="text-sm text-blue-600">Employee Rating</div>
+                    </div>
+                    <div className="bg-purple-50 p-4 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-purple-600">85%</div>
+                      <div className="text-sm text-purple-600">Satisfaction Rate</div>
+                    </div>
+                    <div className="bg-orange-50 p-4 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-orange-600">12</div>
+                      <div className="text-sm text-orange-600">Years Avg Experience</div>
+                    </div>
+                    <div className="bg-green-50 p-4 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-green-600">95%</div>
+                      <div className="text-sm text-green-600">Retention Rate</div>
+                    </div>
+                    <div className="bg-indigo-50 p-4 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-indigo-600">78%</div>
+                      <div className="text-sm text-indigo-600">Graduate Hiring Rate</div>
+                    </div>
+                    <div className="bg-teal-50 p-4 rounded-lg text-center">
+                      <div className="text-2xl font-bold text-teal-600">65%</div>
+                      <div className="text-sm text-teal-600">Fresh Graduate %</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Benefits (Mock Data) */}
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">Benefits & Perks</h3>
+                  <div className="space-y-2">
+                    {[
+                      'Comprehensive health insurance',
+                      'Flexible vacation',
+                      'Training programs',
+                      'Creative work environment',
+                      'Excellent promotion opportunities'
+                    ].map((benefit, index) => (
+                      <div key={index} className="flex items-center">
+                        <Award size={16} className="text-green-500 mr-2" />
+                        <span className="text-gray-700">{benefit}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="mt-8 pt-6 border-t border-gray-200 flex gap-4">
+              <button
+                onClick={() => handleSaveCompany(selectedCompanyDetails.id)}
+                className={`btn flex items-center gap-2 ${
+                  savedCompanies.has(selectedCompanyDetails.id) 
+                    ? 'btn-secondary' 
+                    : 'btn-primary'
+                }`}
+              >
+                <BookmarkPlus size={20} />
+                {savedCompanies.has(selectedCompanyDetails.id) ? 'Remove from Saved' : 'Save Company'}
+              </button>
+              
+              {selectedCompanyDetails.website && (
+                <a
+                  href={selectedCompanyDetails.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary flex items-center gap-2"
+                >
+                  <Globe size={20} />
+                  Visit Website
+                </a>
+              )}
+              
+              <button
+                onClick={closeCompanyDetails}
+                className="btn btn-secondary"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Companies List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCompanies.map((company) => (
@@ -403,6 +611,17 @@ const Companies = () => {
                 <Briefcase size={16} className="mr-2" />
                 {company.openPositions || 0} Open Positions
               </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => handleViewCompanyDetails(company)}
+                className="flex-1 btn btn-secondary flex items-center justify-center gap-2"
+              >
+                <Eye size={16} />
+                View Details
+              </button>
             </div>
 
             {/* Employer Edit Controls */}

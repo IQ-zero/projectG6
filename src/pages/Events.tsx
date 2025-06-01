@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { mockEvents } from '../data/mockData';
-import { Calendar, MapPin, Users, Clock, ExternalLink, Search, BookmarkPlus, Edit2, Trash2, PlusCircle } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, Search, BookmarkPlus, Edit2, Trash2, PlusCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { useUserData } from '../context/UserContext';
 import { useAuth } from '../context/AuthContext';
@@ -24,7 +24,7 @@ const Events = () => {
   const [showVirtualOnly, setShowVirtualOnly] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showEventForm, setShowEventForm] = useState(false);
-  const [editingEvent, setEditingEvent] = useState<number | null>(null);
+  const [editingEvent, setEditingEvent] = useState<string | null>(null);
   const [events, setEvents] = useState(mockEvents);
   const [eventFormData, setEventFormData] = useState<EventFormData>({
     title: '',
@@ -172,7 +172,7 @@ const Events = () => {
           <h1 className="text-3xl font-bold text-gray-900">Upcoming Events</h1>
           <p className="mt-2 text-gray-600">Browse and register for career events, workshops, and networking opportunities</p>
         </div>
-        {user?.role === 'employer' && (
+        {(user?.role === 'employer' || user?.role === 'admin') && (
           <button
             onClick={() => setShowEventForm(true)}
             className="btn btn-primary flex items-center gap-2"
